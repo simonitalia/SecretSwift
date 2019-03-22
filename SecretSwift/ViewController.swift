@@ -92,7 +92,7 @@ class ViewController: UIViewController {
     @IBAction func authenticateButtonTapped(_ sender: Any) {
         
         //If physical device
-//        #if !targetEnvironment(simulator)
+        #if !targetEnvironment(simulator)
         
         //Check device supports biometric authentication
         let context = LAContext()
@@ -130,18 +130,18 @@ class ViewController: UIViewController {
         }
         
         //If simulator
-//        #else
-//        if true {
-//            DispatchQueue.main.async {
-//                if true {
-//                    self.unlockSecretText()
-//                }
-//            }
-//        }
-        
+        #else
+        if true {
+            DispatchQueue.main.async {
+                if true {
+                    self.unlockSecretText()
+                }
+            }
+        }
+
         //End compiler directive
-//        #endif
-        
+        #endif
+
     }//End authenticateButtonTapped() action method
     
     //If device does not support biometric authentication
