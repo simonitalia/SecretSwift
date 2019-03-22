@@ -18,7 +18,7 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         
         //Set VC title
-        title = "Nothing to see here"
+        title = "Editor is Locked 🔒"
         
         //Subscribe to notifications
         let notificationCenter = NotificationCenter.default
@@ -70,7 +70,7 @@ class ViewController: UIViewController {
             
             //Hide textView
             secretTextView.isHidden = true
-            title = "Nothing to see here"
+            title = "Editor is Locked 🔒"
         }
     }
     
@@ -80,7 +80,7 @@ class ViewController: UIViewController {
         
         //Unhide textView
         secretTextView.isHidden = false
-        title = "Secret Stuff"
+        title = "Editor Unlocked 🔓"
         
         //Set saved text with Key to textView text
         if let text = KeychainWrapper.standard.string(forKey: "SecureText") {
@@ -92,7 +92,7 @@ class ViewController: UIViewController {
     @IBAction func authenticateButtonTapped(_ sender: Any) {
         
         //If physical device
-        #if !targetEnvironment(simulator)
+//        #if !targetEnvironment(simulator)
         
         //Check device supports biometric authentication
         let context = LAContext()
@@ -120,22 +120,91 @@ class ViewController: UIViewController {
                     }
                 }
             }
+        
+        //Password fallback if device doesn't support biometric authentication
+        } else {
+            
+            //Call password manager
+            passwordFallback()
+
         }
         
         //If simulator
-        #else
-        if true {
-            DispatchQueue.main.async {
-                if true {
-                    self.unlockSecretText()
-                }
-            }
-        }
+//        #else
+//        if true {
+//            DispatchQueue.main.async {
+//                if true {
+//                    self.unlockSecretText()
+//                }
+//            }
+//        }
         
         //End compiler directive
-        #endif
+//        #endif
         
     }//End authenticateButtonTapped() action method
     
+    //If device does not support biometric authentication
+    func passwordFallback() {
+        
+//        //Alert Controller properties
+//        let alertTitle: String
+//        let alertController: UIAlertController
+//        let submitAction: UIAlertAction
+        
+        //Check if password already exists
+        if let _ = KeychainWrapper.standard.string(forKey: "SecurePassword") {
+    
+            //If password exists
+            let alertController = UIAlertController(title: "Enter app password", message: nil, preferredStyle: .alert)
+            alertController.addTextField()
+            
+            let submitAction = UIAlertAction(title: "Submit", style: .default) {
+                [unowned self, alertController] (action: UIAlertAction) in
+                
+                //Check password entered matches saved password
+                let text = alertController.textFields![0]
+                let password = KeychainWrapper.standard.string(forKey: "SecurePassword")
+                
+                //If text entered matches saved password, open app
+                if text.text! == password {
+                    self.unlockSecretText()
+                    
+                } else {
+                    
+                    //Exit process
+                    return
+                }
+                
+            }
+            
+            //Present Alert
+            alertController.addAction(submitAction)
+            present(alertController, animated: true)
+            
+ 
+        //If password doesn't exist, create alert to prompt user to create new password
+        } else {
+            let alertController = UIAlertController(title: "Create app password", message: nil, preferredStyle: .alert)
+            alertController.addTextField()
+            
+            let submitAction = UIAlertAction(title: "Submit", style: .default) {
+                [unowned self, alertController] (action: UIAlertAction) in
+                let text = alertController.textFields![0]
+                
+                //Once password set, open app
+                self.unlockSecretText()
+                
+                //Save password to Keychain
+                _ = KeychainWrapper.standard.set(text.text!, forKey: "SecurePassword")
+            }
+            
+            //Present Alert
+            alertController.addAction(submitAction)
+            present(alertController, animated: true)
+            
+        }
+
+    } //End passswordFallback() method
     
 }
